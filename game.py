@@ -10,10 +10,15 @@ class Game:
         self.card_font = pygame.font.Font(None, 27)
         self.HIT_BUTTON = [100, 800, 200, 100]
         self.STAND_BUTTON = [500, 800, 200, 100]
+        self.RESET_BUTTON = [500, 0, 200, 100]
         self.deck = Deck()
         self.player_hand = [self.deck.deal_card(), self.deck.deal_card()]
         self.dealer_hand = [self.deck.deal_card(), self.deck.deal_card()]
         self.game_over = False
+
+    def is_button_clicked(self, button, mouse_pos):
+        return (button[0] <= mouse_pos[0] <= (button[0] + button[2]) and
+                button[1] <= mouse_pos[1] <= (button[1] + button[3]))
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -21,14 +26,14 @@ class Game:
                 return False
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if not self.game_over:
-                    if self.HIT_BUTTON[0] <= event.pos[0] <= (self.HIT_BUTTON[0] + self.HIT_BUTTON[2]) and self.HIT_BUTTON[1] <= event.pos[1] <= (self.HIT_BUTTON[1] + self.HIT_BUTTON[3]):
+                    if self.is_button_clicked(self.HIT_BUTTON, event.pos):
                         self.player_hand.append(self.deck.deal_card())
-                    elif self.STAND_BUTTON[0] <= event.pos[0] <= (self.STAND_BUTTON[0] + self.STAND_BUTTON[2]) and self.STAND_BUTTON[1] <= event.pos[1] <= (self.STAND_BUTTON[1] + self.STAND_BUTTON[3]):
+                    elif self.is_button_clicked(self.STAND_BUTTON, event.pos):
                         while self.calculate_total(self.dealer_hand) < 17:
                             self.dealer_hand.append(self.deck.deal_card())
                         self.game_over = True
                 if self.game_over:
-                    if 400 <= event.pos[0] <= 600 and 0 <= event.pos[1] <= 100:
+                    if self.is_button_clicked(self.RESET_BUTTON, event.pos):
                         self.reset_game()
         return True
 
@@ -42,8 +47,6 @@ class Game:
 
     def draw(self):
         self.screen.fill((0, 255, 0))
-        print(self.player_hand)
-        print(self.dealer_hand)
         draw_text(self.screen, self.font, f"Player's hand:  {
                   self.calculate_total(self.player_hand)}", 100, 100)
         for i, card in enumerate(self.player_hand):
@@ -71,7 +74,7 @@ class Game:
                 draw_text(self.screen, self.font, "Dealer wins!", 0, 0)
             # Draw button to deal new hand
             draw_button(self.screen, self.font,
-                        "Deal Again", 400, 0, 200, 100)
+                        "Deal Again", *self.RESET_BUTTON)
 
         pygame.display.flip()
 
