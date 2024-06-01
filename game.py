@@ -2,6 +2,7 @@ import pygame
 from ui import draw_text, draw_button, draw_card
 from deck import Deck
 
+
 class Game:
     def __init__(self, screen):
         self.screen = screen
@@ -38,11 +39,13 @@ class Game:
     def draw(self):
         self.screen.fill((0, 255, 0))
         draw_text(self.screen, self.font, "Player's hand:", 100, 100)
-        draw_text(self.screen, self.font, str(self.calculate_total(self.player_hand)), 400, 100)
+        draw_text(self.screen, self.font, str(
+            self.calculate_total(self.player_hand)), 400, 100)
         for i, card in enumerate(self.player_hand):
             draw_card(self.screen, self.card_font, card, 100 + i * 110, 150)
         draw_text(self.screen, self.font, "Dealer's hand:", 100, 300)
-        draw_text(self.screen, self.font, str(self.calculate_total(self.dealer_hand)), 400, 300)
+        draw_text(self.screen, self.font, str(
+            self.calculate_total(self.dealer_hand)), 400, 300)
         for i, card in enumerate(self.dealer_hand):
             draw_card(self.screen, self.card_font, card, 100 + i * 110, 350)
         draw_button(self.screen, self.font, "Hit", *self.HIT_BUTTON)
@@ -53,9 +56,11 @@ class Game:
 
         if self.game_over:
             if player_total > 21:
-                draw_text(self.screen, self.font, "Player busts! Dealer wins!", 0, 0)
+                draw_text(self.screen, self.font,
+                          "Player busts! Dealer wins!", 0, 0)
             elif dealer_total > 21:
-                draw_text(self.screen, self.font, "Dealer busts! Player wins!", 0, 0)
+                draw_text(self.screen, self.font,
+                          "Dealer busts! Player wins!", 0, 0)
             elif player_total == 21:
                 draw_text(self.screen, self.font, "Player wins!", 0, 0)
             elif dealer_total == 21:
@@ -78,4 +83,3 @@ class Game:
             total -= 10
             aces -= 1
         return total
-
