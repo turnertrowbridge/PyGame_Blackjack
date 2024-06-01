@@ -42,14 +42,14 @@ class Game:
 
     def draw(self):
         self.screen.fill((0, 255, 0))
-        draw_text(self.screen, self.font, "Player's hand:", 100, 100)
-        draw_text(self.screen, self.font, str(
-            self.calculate_total(self.player_hand)), 400, 100)
+        print(self.player_hand)
+        print(self.dealer_hand)
+        draw_text(self.screen, self.font, f"Player's hand:  {
+                  self.calculate_total(self.player_hand)}", 100, 100)
         for i, card in enumerate(self.player_hand):
             draw_card(self.screen, self.card_font, card, 100 + i * 110, 150)
-        draw_text(self.screen, self.font, "Dealer's hand:", 100, 300)
-        draw_text(self.screen, self.font, str(
-            self.calculate_total(self.dealer_hand)), 400, 300)
+        draw_text(self.screen, self.font, f"Dealer's hand:   {
+                  self.calculate_total(self.dealer_hand)}", 100, 300)
         for i, card in enumerate(self.dealer_hand):
             draw_card(self.screen, self.card_font, card, 100 + i * 110, 350)
         draw_button(self.screen, self.font, "Hit", *self.HIT_BUTTON)
