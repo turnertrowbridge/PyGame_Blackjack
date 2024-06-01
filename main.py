@@ -83,6 +83,7 @@ def calculate_total(hand):
 
 # Game loop
 running = True
+game_over = False  # Lock the buttons when the game is over
 deck = create_deck()
 player_hand = [deal_card(deck), deal_card(deck)]
 dealer_hand = [deal_card(deck), deal_card(deck)]
@@ -90,7 +91,7 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        elif event.type == pygame.MOUSEBUTTONDOWN:
+        elif event.type == pygame.MOUSEBUTTONDOWN and not game_over:
             if HIT_BUTTON[0] <= event.pos[0] <= (HIT_BUTTON[0] + HIT_BUTTON[2]) and HIT_BUTTON[1] <= event.pos[1] <= (HIT_BUTTON[1] + HIT_BUTTON[3]):
                 player_hand.append(deal_card(deck))
 
@@ -114,6 +115,11 @@ while running:
     # Check for wins
     player_total = calculate_total(player_hand)
     dealer_total = calculate_total(dealer_hand)
+
+    # Check for game over
+    if player_total > 21 or dealer_total > 21 or player_total == 21 or dealer_total == 21:
+        game_over = True
+
     if player_total > 21:
         draw_text("Player busts! Dealer wins!", 0, 0)
     elif dealer_total > 21:
@@ -122,6 +128,7 @@ while running:
         draw_text("Player wins!", 100, 250)
     elif dealer_total == 21:
         draw_text("Dealer wins!", 100, 250)
+
 
     # Update the display
     pygame.display.flip()
