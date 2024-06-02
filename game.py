@@ -23,6 +23,10 @@ class Game:
         self.BET_50_BUTTON = [350, 675, 200, 50]
         self.bet_paid = False
         self.win_status = None
+        self.RESET_GAME_BUTTON = [750, 0, 250, 100]
+        self.CONFIRM_RESET_BUTTON = [300, 300, 200, 100]
+        self.CANCEL_RESET_BUTTON = [650, 300, 200, 100]
+        self.show_reset_prompt = False
 
     def is_button_clicked(self, button, mouse_pos):
         return (button[0] <= mouse_pos[0] <= (button[0] + button[2]) and
@@ -36,18 +40,26 @@ class Game:
                 if not self.game_over:
                     if self.is_button_clicked(self.HIT_BUTTON, event.pos):
                         self.player_hand.append(self.deck.deal_card())
-                    elif self.is_button_clicked(self.STAND_BUTTON, event.pos):
+                    if self.is_button_clicked(self.STAND_BUTTON, event.pos):
                         while self.calculate_total(self.dealer_hand) < 17:
                             self.dealer_hand.append(self.deck.deal_card())
                         self.game_over = True
-                    elif self.is_button_clicked(self.BET_1_BUTTON, event.pos):
+                    if self.is_button_clicked(self.BET_1_BUTTON, event.pos):
                         self.place_bet(1)
-                    elif self.is_button_clicked(self.BET_10_BUTTON, event.pos):
+                    if self.is_button_clicked(self.BET_10_BUTTON, event.pos):
                         self.place_bet(10)
-                    elif self.is_button_clicked(self.BET_25_BUTTON, event.pos):
+                    if self.is_button_clicked(self.BET_25_BUTTON, event.pos):
                         self.place_bet(25)
-                    elif self.is_button_clicked(self.BET_50_BUTTON, event.pos):
+                    if self.is_button_clicked(self.BET_50_BUTTON, event.pos):
                         self.place_bet(50)
+                    if self.is_button_clicked(self.RESET_GAME_BUTTON, event.pos):
+                        self.show_reset_prompt = True
+                    if self.show_reset_prompt:
+                        if self.is_button_clicked(self.CONFIRM_RESET_BUTTON, event.pos):
+                            self.reset_game()
+                            self.show_reset_prompt = False
+                        elif self.is_button_clicked(self.CANCEL_RESET_BUTTON, event.pos):
+                            self.show_reset_prompt = False
 
                 if self.game_over:
                     if self.is_button_clicked(self.RESET_BUTTON, event.pos):
@@ -97,6 +109,20 @@ class Game:
                   self.current_bet}", 100, 550)
         draw_text(self.screen, self.font, f"Balance: ${
                   self.player_balance}", 100, 500)
+
+        # Draw reset game button
+        draw_button(self.screen, self.font, "Reset Game",
+                    *self.RESET_GAME_BUTTON)
+        if self.show_reset_prompt:
+            pygame.draw.rect(self.screen, (0, 0, 0), (180, 180, 840, 320))
+            pygame.draw.rect(self.screen, (255, 255, 255),
+                             (200, 200, 800, 280))
+            draw_text(self.screen, self.font,
+                      "Are you sure you want to reset the game?", 250, 250)
+            draw_button(self.screen, self.font, "Yes",
+                        *self.CONFIRM_RESET_BUTTON)
+            draw_button(self.screen, self.font, "No",
+                        *self.CANCEL_RESET_BUTTON)
 
         if self.game_over:
             player_total = self.calculate_total(self.player_hand)
@@ -160,6 +186,10 @@ class Game:
         self.current_bet = 0
         self.win_status = None
         self.bet_paid = False
+
+    def reset_game(self):
+        self.player_balance = 100
+        self.new_deal()
 
     def place_bet(self, amount):
         if self.player_balance >= amount:
