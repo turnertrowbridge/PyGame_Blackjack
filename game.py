@@ -51,7 +51,7 @@ class Game:
 
                 if self.game_over:
                     if self.is_button_clicked(self.RESET_BUTTON, event.pos):
-                        self.reset_game()
+                        self.new_deal()
         return True
 
     def update(self):
@@ -152,7 +152,7 @@ class Game:
             aces -= 1
         return total
 
-    def reset_game(self):
+    def new_deal(self):
         self.deck = Deck()
         self.player_hand = [self.deck.deal_card(), self.deck.deal_card()]
         self.dealer_hand = [self.deck.deal_card(), self.deck.deal_card()]
