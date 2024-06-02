@@ -1,5 +1,5 @@
 import pygame
-from ui import draw_text, draw_button, draw_card, draw_hidden_card
+from ui import draw_text, draw_button, draw_card, draw_hidden_card, draw_menu_card
 from deck import Deck
 
 
@@ -7,11 +7,13 @@ class Game:
     def __init__(self, screen):
         self.screen = screen
         self.MAIN_MENU_BUTTON = [300, 300, 200, 100]
-        self.PLAY_BUTTON = [300, 200, 200, 100]
-        self.QUIT_BUTTON = [300, 400, 200, 100]
+        self.PLAY_BUTTON = [400, 550, 200, 100]
+        self.QUIT_BUTTON = [725, 550, 200, 100]
         self.show_main_menu = True
         self.font = pygame.font.Font(None, 50)
         self.card_font = pygame.font.Font(None, 27)
+        self.menu_card_font = pygame.font.Font(None, 41)
+        self.menu_font = pygame.font.Font(None, 100)
         self.HIT_BUTTON = [100, 800, 200, 100]
         self.STAND_BUTTON = [500, 800, 200, 100]
         self.RESET_BUTTON = [500, 0, 200, 100]
@@ -45,6 +47,7 @@ class Game:
                 if self.show_main_menu:
                     if self.is_button_clicked(self.PLAY_BUTTON, event.pos):
                         self.show_main_menu = False
+                        self.reset_game()
                     elif self.is_button_clicked(self.QUIT_BUTTON, event.pos):
                         return False
                 elif not self.game_over:
@@ -62,19 +65,23 @@ class Game:
                         self.place_bet(25)
                     if self.is_button_clicked(self.BET_50_BUTTON, event.pos):
                         self.place_bet(50)
-                    if self.is_button_clicked(self.EXIT_TO_MAIN_MENU_BUTTON, event.pos):
-                        self.show_reset_prompt = True
-                    if self.show_reset_prompt:
-                        if self.is_button_clicked(self.CONFIRM_BUTTON, event.pos):
-                            self.show_main_menu = True
-                            self.show_reset_prompt = False
-                        elif self.is_button_clicked(self.CANCEL_BUTTON, event.pos):
-                            self.show_reset_prompt = False
+                    self.handle_exit_to_main_menu(event)
 
                 if self.game_over:
                     if self.is_button_clicked(self.RESET_BUTTON, event.pos):
                         self.new_deal()
+                    self.handle_exit_to_main_menu(event)
         return True
+
+    def handle_exit_to_main_menu(self, event):
+        if self.is_button_clicked(self.EXIT_TO_MAIN_MENU_BUTTON, event.pos):
+            self.show_reset_prompt = True
+        if self.show_reset_prompt:
+            if self.is_button_clicked(self.CONFIRM_BUTTON, event.pos):
+                self.show_main_menu = True
+                self.show_reset_prompt = False
+            elif self.is_button_clicked(self.CANCEL_BUTTON, event.pos):
+                self.show_reset_prompt = False
 
     def update(self):
         player_total = self.calculate_total(self.player_hand)
@@ -87,7 +94,21 @@ class Game:
     def draw(self):
         if self.show_main_menu:
             self.screen.fill((0, 255, 0))
-            draw_text(self.screen, self.font, "Blackjack", 350, 200)
+
+            # Draw background
+            pygame.draw.rect(self.screen, (0, 0, 0), (180, 180, 960, 520))
+            pygame.draw.rect(self.screen, (255, 255, 255),
+                             (200, 200, 920, 480))
+
+            # Draw Ace cards
+            aces = [("Ace", "Hearts", "A"), ("Ace", "Clubs", "A"),
+                    ("Ace", "Diamonds", "A"), ("Ace", "Spades", "A")]
+            for i, ace in enumerate(aces):
+                draw_menu_card(self.screen, self.menu_card_font,
+                               ace, 250 + i * 150 * 1.5, 300)
+
+            # Draw main menu buttons
+            draw_text(self.screen, self.menu_font, "Blackjack", 500, 210)
             draw_button(self.screen, self.font, "Play", *self.PLAY_BUTTON)
             draw_button(self.screen, self.font, "Quit", *self.QUIT_BUTTON)
         else:
