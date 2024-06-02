@@ -1,5 +1,5 @@
 import pygame
-from ui import draw_text, draw_button, draw_card
+from ui import draw_text, draw_button, draw_card, draw_hidden_card
 from deck import Deck
 
 
@@ -49,12 +49,26 @@ class Game:
         self.screen.fill((0, 255, 0))
         draw_text(self.screen, self.font, f"Player's hand:  {
                   self.calculate_total(self.player_hand)}", 100, 100)
+
+        # Draw player's hand
         for i, card in enumerate(self.player_hand):
             draw_card(self.screen, self.card_font, card, 100 + i * 110, 150)
-        draw_text(self.screen, self.font, f"Dealer's hand:   {
-                  self.calculate_total(self.dealer_hand)}", 100, 300)
-        for i, card in enumerate(self.dealer_hand):
-            draw_card(self.screen, self.card_font, card, 100 + i * 110, 350)
+
+        # Draw dealer's hand
+        if self.game_over:
+            for i, card in enumerate(self.dealer_hand):
+                draw_card(self.screen, self.card_font,
+                          card, 100 + i * 110, 350)
+                draw_text(self.screen, self.font, f"Dealer's hand:   {
+                    self.calculate_total(self.dealer_hand)}", 100, 300)
+
+        else:
+            draw_card(self.screen, self.card_font,
+                      self.dealer_hand[0], 100, 350)
+            draw_hidden_card(self.screen, self.card_font, 210, 350)
+            draw_text(self.screen, self.font, f"Dealer's hand:   {
+                self.calculate_total(self.dealer_hand[:1])} + ?", 100, 300)
+
         draw_button(self.screen, self.font, "Hit", *self.HIT_BUTTON)
         draw_button(self.screen, self.font, "Stand", *self.STAND_BUTTON)
 
@@ -72,6 +86,13 @@ class Game:
                 draw_text(self.screen, self.font, "Player wins!", 0, 0)
             elif dealer_total == 21:
                 draw_text(self.screen, self.font, "Dealer wins!", 0, 0)
+            elif player_total > dealer_total:
+                draw_text(self.screen, self.font, "Player wins!", 0, 0)
+            elif dealer_total > player_total:
+                draw_text(self.screen, self.font, "Dealer wins!", 0, 0)
+            else:
+                draw_text(self.screen, self.font, "It's a tie!", 0, 0)
+
             # Draw button to deal new hand
             draw_button(self.screen, self.font,
                         "Deal Again", *self.RESET_BUTTON)

@@ -25,3 +25,9 @@ def draw_card(screen, font, card, x, y, card_color=(255, 255, 255), text_color=(
     card_sprite = pygame.image.load(f"./images/{card[1].lower()}.png")
     card_sprite = pygame.transform.scale(card_sprite, (50, 50))
     screen.blit(card_sprite, (x + 25, y + 50))
+
+
+def draw_hidden_card(screen, font, x, y):
+    card_back = pygame.image.load("./images/card_back.png")
+    card_back = pygame.transform.scale(card_back, (100, 150))
+    screen.blit(card_back, (x, y))
