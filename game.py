@@ -6,6 +6,10 @@ from deck import Deck
 class Game:
     def __init__(self, screen):
         self.screen = screen
+        self.MAIN_MENU_BUTTON = [300, 300, 200, 100]
+        self.PLAY_BUTTON = [300, 200, 200, 100]
+        self.QUIT_BUTTON = [300, 400, 200, 100]
+        self.show_main_menu = True
         self.font = pygame.font.Font(None, 50)
         self.card_font = pygame.font.Font(None, 27)
         self.HIT_BUTTON = [100, 800, 200, 100]
@@ -23,10 +27,11 @@ class Game:
         self.BET_50_BUTTON = [350, 675, 200, 50]
         self.bet_paid = False
         self.win_status = None
-        self.RESET_GAME_BUTTON = [750, 0, 250, 100]
-        self.CONFIRM_RESET_BUTTON = [300, 300, 200, 100]
-        self.CANCEL_RESET_BUTTON = [650, 300, 200, 100]
+        self.EXIT_TO_MAIN_MENU_BUTTON = [750, 0, 250, 100]
+        self.CONFIRM_BUTTON = [300, 300, 200, 100]
+        self.CANCEL_BUTTON = [750, 300, 200, 100]
         self.show_reset_prompt = False
+        self.show_main_menu = True
 
     def is_button_clicked(self, button, mouse_pos):
         return (button[0] <= mouse_pos[0] <= (button[0] + button[2]) and
@@ -37,7 +42,12 @@ class Game:
             if event.type == pygame.QUIT:
                 return False
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                if not self.game_over:
+                if self.show_main_menu:
+                    if self.is_button_clicked(self.PLAY_BUTTON, event.pos):
+                        self.show_main_menu = False
+                    elif self.is_button_clicked(self.QUIT_BUTTON, event.pos):
+                        return False
+                elif not self.game_over:
                     if self.is_button_clicked(self.HIT_BUTTON, event.pos):
                         self.player_hand.append(self.deck.deal_card())
                     if self.is_button_clicked(self.STAND_BUTTON, event.pos):
@@ -52,13 +62,13 @@ class Game:
                         self.place_bet(25)
                     if self.is_button_clicked(self.BET_50_BUTTON, event.pos):
                         self.place_bet(50)
-                    if self.is_button_clicked(self.RESET_GAME_BUTTON, event.pos):
+                    if self.is_button_clicked(self.EXIT_TO_MAIN_MENU_BUTTON, event.pos):
                         self.show_reset_prompt = True
                     if self.show_reset_prompt:
-                        if self.is_button_clicked(self.CONFIRM_RESET_BUTTON, event.pos):
-                            self.reset_game()
+                        if self.is_button_clicked(self.CONFIRM_BUTTON, event.pos):
+                            self.show_main_menu = True
                             self.show_reset_prompt = False
-                        elif self.is_button_clicked(self.CANCEL_RESET_BUTTON, event.pos):
+                        elif self.is_button_clicked(self.CANCEL_BUTTON, event.pos):
                             self.show_reset_prompt = False
 
                 if self.game_over:
@@ -75,90 +85,97 @@ class Game:
             self.game_over = True
 
     def draw(self):
-        self.screen.fill((0, 255, 0))
-        draw_text(self.screen, self.font, f"Player's hand:  {
-                  self.calculate_total(self.player_hand)}", 100, 100)
-
-        # Draw player's hand
-        for i, card in enumerate(self.player_hand):
-            draw_card(self.screen, self.card_font, card, 100 + i * 110, 150)
-
-        # Draw dealer's hand
-        if self.game_over:
-            for i, card in enumerate(self.dealer_hand):
-                draw_card(self.screen, self.card_font,
-                          card, 100 + i * 110, 350)
-                draw_text(self.screen, self.font, f"Dealer's hand:   {
-                    self.calculate_total(self.dealer_hand)}", 100, 300)
-
+        if self.show_main_menu:
+            self.screen.fill((0, 255, 0))
+            draw_text(self.screen, self.font, "Blackjack", 350, 200)
+            draw_button(self.screen, self.font, "Play", *self.PLAY_BUTTON)
+            draw_button(self.screen, self.font, "Quit", *self.QUIT_BUTTON)
         else:
-            draw_card(self.screen, self.card_font,
-                      self.dealer_hand[0], 100, 350)
-            draw_hidden_card(self.screen, self.card_font, 210, 350)
-            draw_text(self.screen, self.font, f"Dealer's hand:   {
-                self.calculate_total(self.dealer_hand[:1])} + ?", 100, 300)
+            self.screen.fill((0, 255, 0))
+            draw_text(self.screen, self.font, f"Player's hand:  {
+                      self.calculate_total(self.player_hand)}", 100, 100)
 
-        draw_button(self.screen, self.font, "Hit", *self.HIT_BUTTON)
-        draw_button(self.screen, self.font, "Stand", *self.STAND_BUTTON)
-        draw_button(self.screen, self.font, "Bet $1", *self.BET_1_BUTTON)
-        draw_button(self.screen, self.font, "Bet $10", *self.BET_10_BUTTON)
-        draw_button(self.screen, self.font, "Bet $25", *self.BET_25_BUTTON)
-        draw_button(self.screen, self.font, "Bet $50", *self.BET_50_BUTTON)
+            # Draw player's hand
+            for i, card in enumerate(self.player_hand):
+                draw_card(self.screen, self.card_font,
+                          card, 100 + i * 110, 150)
 
-        draw_text(self.screen, self.font, f"Current bet: ${
-                  self.current_bet}", 100, 550)
-        draw_text(self.screen, self.font, f"Balance: ${
-                  self.player_balance}", 100, 500)
+            # Draw dealer's hand
+            if self.game_over:
+                for i, card in enumerate(self.dealer_hand):
+                    draw_card(self.screen, self.card_font,
+                              card, 100 + i * 110, 350)
+                    draw_text(self.screen, self.font, f"Dealer's hand:   {
+                        self.calculate_total(self.dealer_hand)}", 100, 300)
 
-        # Draw reset game button
-        draw_button(self.screen, self.font, "Reset Game",
-                    *self.RESET_GAME_BUTTON)
-        if self.show_reset_prompt:
-            pygame.draw.rect(self.screen, (0, 0, 0), (180, 180, 840, 320))
-            pygame.draw.rect(self.screen, (255, 255, 255),
-                             (200, 200, 800, 280))
-            draw_text(self.screen, self.font,
-                      "Are you sure you want to reset the game?", 250, 250)
-            draw_button(self.screen, self.font, "Yes",
-                        *self.CONFIRM_RESET_BUTTON)
-            draw_button(self.screen, self.font, "No",
-                        *self.CANCEL_RESET_BUTTON)
-
-        if self.game_over:
-            player_total = self.calculate_total(self.player_hand)
-            dealer_total = self.calculate_total(self.dealer_hand)
-            if player_total > 21:
-                draw_text(self.screen, self.font,
-                          "Player busts! Dealer wins!", 0, 0)
-            elif dealer_total > 21:
-                draw_text(self.screen, self.font,
-                          "Dealer busts! Player wins!", 0, 0)
-                self.win_status = "W"
-            elif player_total == 21:
-                draw_text(self.screen, self.font, "Player wins!", 0, 0)
-                self.win_status = "W"
-            elif dealer_total == 21:
-                draw_text(self.screen, self.font, "Dealer wins!", 0, 0)
-            elif player_total > dealer_total:
-                draw_text(self.screen, self.font, "Player wins!", 0, 0)
-                self.win_status = "W"
-            elif dealer_total > player_total:
-                draw_text(self.screen, self.font, "Dealer wins!", 0, 0)
             else:
-                draw_text(self.screen, self.font, "It's a tie!", 0, 0)
-                self.win_status = "T"
+                draw_card(self.screen, self.card_font,
+                          self.dealer_hand[0], 100, 350)
+                draw_hidden_card(self.screen, self.card_font, 210, 350)
+                draw_text(self.screen, self.font, f"Dealer's hand:   {
+                    self.calculate_total(self.dealer_hand[:1])} + ?", 100, 300)
 
-            # Pay out winnings
-            if self.win_status == "W" and not self.bet_paid:
-                self.player_balance += self.current_bet * 2
-                self.bet_paid = True
-            elif self.win_status == "T" and not self.bet_paid:
-                self.player_balance += self.current_bet
-                self.bet_paid = True
+            draw_button(self.screen, self.font, "Hit", *self.HIT_BUTTON)
+            draw_button(self.screen, self.font, "Stand", *self.STAND_BUTTON)
+            draw_button(self.screen, self.font, "Bet $1", *self.BET_1_BUTTON)
+            draw_button(self.screen, self.font, "Bet $10", *self.BET_10_BUTTON)
+            draw_button(self.screen, self.font, "Bet $25", *self.BET_25_BUTTON)
+            draw_button(self.screen, self.font, "Bet $50", *self.BET_50_BUTTON)
 
-            # Draw button to deal new hand
-            draw_button(self.screen, self.font,
-                        "Deal Again", *self.RESET_BUTTON)
+            draw_text(self.screen, self.font, f"Current bet: ${
+                      self.current_bet}", 100, 550)
+            draw_text(self.screen, self.font, f"Balance: ${
+                      self.player_balance}", 100, 500)
+
+            # Draw reset game button
+            draw_button(self.screen, self.font, "Main Menu",
+                        *self.EXIT_TO_MAIN_MENU_BUTTON)
+            if self.show_reset_prompt:
+                pygame.draw.rect(self.screen, (0, 0, 0), (180, 180, 940, 320))
+                pygame.draw.rect(self.screen, (255, 255, 255),
+                                 (200, 200, 900, 280))
+                draw_text(self.screen, self.font,
+                          "Are you sure you want to exit to the Main Menu?", 250, 250)
+                draw_button(self.screen, self.font, "Yes",
+                            *self.CONFIRM_BUTTON)
+                draw_button(self.screen, self.font, "No",
+                            *self.CANCEL_BUTTON)
+
+            if self.game_over:
+                player_total = self.calculate_total(self.player_hand)
+                dealer_total = self.calculate_total(self.dealer_hand)
+                if player_total > 21:
+                    draw_text(self.screen, self.font,
+                              "Player busts! Dealer wins!", 0, 0)
+                elif dealer_total > 21:
+                    draw_text(self.screen, self.font,
+                              "Dealer busts! Player wins!", 0, 0)
+                    self.win_status = "W"
+                elif player_total == 21:
+                    draw_text(self.screen, self.font, "Player wins!", 0, 0)
+                    self.win_status = "W"
+                elif dealer_total == 21:
+                    draw_text(self.screen, self.font, "Dealer wins!", 0, 0)
+                elif player_total > dealer_total:
+                    draw_text(self.screen, self.font, "Player wins!", 0, 0)
+                    self.win_status = "W"
+                elif dealer_total > player_total:
+                    draw_text(self.screen, self.font, "Dealer wins!", 0, 0)
+                else:
+                    draw_text(self.screen, self.font, "It's a tie!", 0, 0)
+                    self.win_status = "T"
+
+                # Pay out winnings
+                if self.win_status == "W" and not self.bet_paid:
+                    self.player_balance += self.current_bet * 2
+                    self.bet_paid = True
+                elif self.win_status == "T" and not self.bet_paid:
+                    self.player_balance += self.current_bet
+                    self.bet_paid = True
+
+                # Draw button to deal new hand
+                draw_button(self.screen, self.font,
+                            "Deal Again", *self.RESET_BUTTON)
 
         pygame.display.flip()
 
