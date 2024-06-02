@@ -17,10 +17,10 @@ class Game:
         self.game_over = False
         self.player_balance = 100
         self.current_bet = 0
-        self.BET_10_BUTTON = [100, 600, 200, 50]
-        self.BET_25_BUTTON = [350, 600, 200, 50]
-        self.BET_50_BUTTON = [100, 675, 200, 50]
-        self.BET_100_BUTTON = [350, 675, 200, 50]
+        self.BET_1_BUTTON = [100, 600, 200, 50]
+        self.BET_10_BUTTON = [350, 600, 200, 50]
+        self.BET_25_BUTTON = [100, 675, 200, 50]
+        self.BET_50_BUTTON = [350, 675, 200, 50]
         self.bet_paid = False
         self.win_status = None
 
@@ -40,14 +40,15 @@ class Game:
                         while self.calculate_total(self.dealer_hand) < 17:
                             self.dealer_hand.append(self.deck.deal_card())
                         self.game_over = True
+                    elif self.is_button_clicked(self.BET_1_BUTTON, event.pos):
+                        self.place_bet(1)
                     elif self.is_button_clicked(self.BET_10_BUTTON, event.pos):
                         self.place_bet(10)
                     elif self.is_button_clicked(self.BET_25_BUTTON, event.pos):
                         self.place_bet(25)
                     elif self.is_button_clicked(self.BET_50_BUTTON, event.pos):
                         self.place_bet(50)
-                    elif self.is_button_clicked(self.BET_100_BUTTON, event.pos):
-                        self.place_bet(100)
+
                 if self.game_over:
                     if self.is_button_clicked(self.RESET_BUTTON, event.pos):
                         self.reset_game()
@@ -87,10 +88,10 @@ class Game:
 
         draw_button(self.screen, self.font, "Hit", *self.HIT_BUTTON)
         draw_button(self.screen, self.font, "Stand", *self.STAND_BUTTON)
+        draw_button(self.screen, self.font, "Bet $1", *self.BET_1_BUTTON)
         draw_button(self.screen, self.font, "Bet $10", *self.BET_10_BUTTON)
         draw_button(self.screen, self.font, "Bet $25", *self.BET_25_BUTTON)
         draw_button(self.screen, self.font, "Bet $50", *self.BET_50_BUTTON)
-        draw_button(self.screen, self.font, "Bet $100", *self.BET_100_BUTTON)
 
         draw_text(self.screen, self.font, f"Current bet: ${
                   self.current_bet}", 100, 550)
