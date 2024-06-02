@@ -15,6 +15,14 @@ class Game:
         self.player_hand = [self.deck.deal_card(), self.deck.deal_card()]
         self.dealer_hand = [self.deck.deal_card(), self.deck.deal_card()]
         self.game_over = False
+        self.player_balance = 100
+        self.current_bet = 0
+        self.BET_10_BUTTON = [100, 600, 200, 50]
+        self.BET_25_BUTTON = [350, 600, 200, 50]
+        self.BET_50_BUTTON = [100, 675, 200, 50]
+        self.BET_100_BUTTON = [350, 675, 200, 50]
+        self.bet_paid = False
+        self.win_status = None
 
     def is_button_clicked(self, button, mouse_pos):
         return (button[0] <= mouse_pos[0] <= (button[0] + button[2]) and
@@ -32,6 +40,14 @@ class Game:
                         while self.calculate_total(self.dealer_hand) < 17:
                             self.dealer_hand.append(self.deck.deal_card())
                         self.game_over = True
+                    elif self.is_button_clicked(self.BET_10_BUTTON, event.pos):
+                        self.place_bet(10)
+                    elif self.is_button_clicked(self.BET_25_BUTTON, event.pos):
+                        self.place_bet(25)
+                    elif self.is_button_clicked(self.BET_50_BUTTON, event.pos):
+                        self.place_bet(50)
+                    elif self.is_button_clicked(self.BET_100_BUTTON, event.pos):
+                        self.place_bet(100)
                 if self.game_over:
                     if self.is_button_clicked(self.RESET_BUTTON, event.pos):
                         self.reset_game()
@@ -71,27 +87,47 @@ class Game:
 
         draw_button(self.screen, self.font, "Hit", *self.HIT_BUTTON)
         draw_button(self.screen, self.font, "Stand", *self.STAND_BUTTON)
+        draw_button(self.screen, self.font, "Bet $10", *self.BET_10_BUTTON)
+        draw_button(self.screen, self.font, "Bet $25", *self.BET_25_BUTTON)
+        draw_button(self.screen, self.font, "Bet $50", *self.BET_50_BUTTON)
+        draw_button(self.screen, self.font, "Bet $100", *self.BET_100_BUTTON)
 
-        player_total = self.calculate_total(self.player_hand)
-        dealer_total = self.calculate_total(self.dealer_hand)
+        draw_text(self.screen, self.font, f"Current bet: ${
+                  self.current_bet}", 100, 550)
+        draw_text(self.screen, self.font, f"Balance: ${
+                  self.player_balance}", 100, 500)
 
         if self.game_over:
+            player_total = self.calculate_total(self.player_hand)
+            dealer_total = self.calculate_total(self.dealer_hand)
             if player_total > 21:
                 draw_text(self.screen, self.font,
                           "Player busts! Dealer wins!", 0, 0)
             elif dealer_total > 21:
                 draw_text(self.screen, self.font,
                           "Dealer busts! Player wins!", 0, 0)
+                self.win_status = "W"
             elif player_total == 21:
                 draw_text(self.screen, self.font, "Player wins!", 0, 0)
+                self.win_status = "W"
             elif dealer_total == 21:
                 draw_text(self.screen, self.font, "Dealer wins!", 0, 0)
             elif player_total > dealer_total:
                 draw_text(self.screen, self.font, "Player wins!", 0, 0)
+                self.win_status = "W"
             elif dealer_total > player_total:
                 draw_text(self.screen, self.font, "Dealer wins!", 0, 0)
             else:
                 draw_text(self.screen, self.font, "It's a tie!", 0, 0)
+                self.win_status = "T"
+
+            # Pay out winnings
+            if self.win_status == "W" and not self.bet_paid:
+                self.player_balance += self.current_bet * 2
+                self.bet_paid = True
+            elif self.win_status == "T" and not self.bet_paid:
+                self.player_balance += self.current_bet
+                self.bet_paid = True
 
             # Draw button to deal new hand
             draw_button(self.screen, self.font,
@@ -120,3 +156,11 @@ class Game:
         self.player_hand = [self.deck.deal_card(), self.deck.deal_card()]
         self.dealer_hand = [self.deck.deal_card(), self.deck.deal_card()]
         self.game_over = False
+        self.current_bet = 0
+        self.win_status = None
+        self.bet_paid = False
+
+    def place_bet(self, amount):
+        if self.player_balance >= amount:
+            self.player_balance -= amount
+            self.current_bet += amount
