@@ -7,7 +7,7 @@ def main():
     pygame.init()
 
     # Set up the display
-    WIDTH, HEIGHT = 1600, 1200
+    WIDTH, HEIGHT = 1280, 960
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
     # Create a Game instance
