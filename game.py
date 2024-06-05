@@ -70,6 +70,7 @@ class Game:
                             self.deck.deal_card(), self.deck.deal_card()]
                         self.dealer_hand = [
                             self.deck.deal_card(), self.deck.deal_card()]
+                    self.handle_exit_to_main_menu(event)
                 # Game in progress
                 elif not self.game_over:
                     if self.is_button_clicked(self.HIT_BUTTON, event.pos):
