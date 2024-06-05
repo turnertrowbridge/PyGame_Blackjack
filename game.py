@@ -34,6 +34,8 @@ class Game:
         self.CANCEL_BUTTON = [750, 300, 200, 100]
         self.show_reset_prompt = False
         self.show_main_menu = True
+        self.DEAL_BUTTON = [400, 400, 200, 100]
+        self.deal_button_clicked = False
 
     def is_button_clicked(self, button, mouse_pos):
         return (button[0] <= mouse_pos[0] <= (button[0] + button[2]) and
@@ -44,19 +46,15 @@ class Game:
             if event.type == pygame.QUIT:
                 return False
             elif event.type == pygame.MOUSEBUTTONDOWN:
+                # Main menu
                 if self.show_main_menu:
                     if self.is_button_clicked(self.PLAY_BUTTON, event.pos):
                         self.show_main_menu = False
                         self.reset_game()
                     elif self.is_button_clicked(self.QUIT_BUTTON, event.pos):
                         return False
-                elif not self.game_over:
-                    if self.is_button_clicked(self.HIT_BUTTON, event.pos):
-                        self.player_hand.append(self.deck.deal_card())
-                    if self.is_button_clicked(self.STAND_BUTTON, event.pos):
-                        while self.calculate_total(self.dealer_hand) < 17:
-                            self.dealer_hand.append(self.deck.deal_card())
-                        self.game_over = True
+                # Get bets
+                elif not self.deal_button_clicked:
                     if self.is_button_clicked(self.BET_1_BUTTON, event.pos):
                         self.place_bet(1)
                     if self.is_button_clicked(self.BET_10_BUTTON, event.pos):
@@ -65,6 +63,21 @@ class Game:
                         self.place_bet(25)
                     if self.is_button_clicked(self.BET_50_BUTTON, event.pos):
                         self.place_bet(50)
+
+                    if self.is_button_clicked(self.DEAL_BUTTON, event.pos):
+                        self.deal_button_clicked = True
+                        self.player_hand = [
+                            self.deck.deal_card(), self.deck.deal_card()]
+                        self.dealer_hand = [
+                            self.deck.deal_card(), self.deck.deal_card()]
+                # Game in progress
+                elif not self.game_over:
+                    if self.is_button_clicked(self.HIT_BUTTON, event.pos):
+                        self.player_hand.append(self.deck.deal_card())
+                    if self.is_button_clicked(self.STAND_BUTTON, event.pos):
+                        while self.calculate_total(self.dealer_hand) < 17:
+                            self.dealer_hand.append(self.deck.deal_card())
+                        self.game_over = True
                     self.handle_exit_to_main_menu(event)
 
                 if self.game_over:
@@ -116,25 +129,30 @@ class Game:
             draw_text(self.screen, self.font, f"Player's hand:  {
                       self.calculate_total(self.player_hand)}", 100, 100)
 
-            # Draw player's hand
-            for i, card in enumerate(self.player_hand):
-                draw_card(self.screen, self.card_font,
-                          card, 100 + i * 110, 150)
-
-            # Draw dealer's hand
-            if self.game_over:
-                for i, card in enumerate(self.dealer_hand):
-                    draw_card(self.screen, self.card_font,
-                              card, 100 + i * 110, 350)
-                    draw_text(self.screen, self.font, f"Dealer's hand:   {
-                        self.calculate_total(self.dealer_hand)}", 100, 300)
-
+            # Draw deal button
+            if not self.deal_button_clicked:
+                draw_button(self.screen, self.font, "Deal", *self.DEAL_BUTTON)
             else:
-                draw_card(self.screen, self.card_font,
-                          self.dealer_hand[0], 100, 350)
-                draw_hidden_card(self.screen, self.card_font, 210, 350)
-                draw_text(self.screen, self.font, f"Dealer's hand:   {
-                    self.calculate_total(self.dealer_hand[:1])} + ?", 100, 300)
+
+                # Draw player's hand
+                for i, card in enumerate(self.player_hand):
+                    draw_card(self.screen, self.card_font,
+                              card, 100 + i * 110, 150)
+
+                # Draw dealer's hand
+                if self.game_over:
+                    for i, card in enumerate(self.dealer_hand):
+                        draw_card(self.screen, self.card_font,
+                                  card, 100 + i * 110, 350)
+                        draw_text(self.screen, self.font, f"Dealer's hand:   {
+                            self.calculate_total(self.dealer_hand)}", 100, 300)
+
+                else:
+                    draw_card(self.screen, self.card_font,
+                              self.dealer_hand[0], 100, 350)
+                    draw_hidden_card(self.screen, self.card_font, 210, 350)
+                    draw_text(self.screen, self.font, f"Dealer's hand:   {
+                        self.calculate_total(self.dealer_hand[:1])} + ?", 100, 300)
 
             draw_button(self.screen, self.font, "Hit", *self.HIT_BUTTON)
             draw_button(self.screen, self.font, "Stand", *self.STAND_BUTTON)
@@ -218,12 +236,13 @@ class Game:
 
     def new_deal(self):
         self.deck = Deck()
-        self.player_hand = [self.deck.deal_card(), self.deck.deal_card()]
-        self.dealer_hand = [self.deck.deal_card(), self.deck.deal_card()]
+        self.player_hand = []
+        self.dealer_hand = []
         self.game_over = False
         self.current_bet = 0
         self.win_status = None
         self.bet_paid = False
+        self.deal_button_clicked = False
 
     def reset_game(self):
         self.player_balance = 100
