@@ -14,8 +14,8 @@ class Game:
         self.card_font = pygame.font.Font(None, 27)
         self.menu_card_font = pygame.font.Font(None, 41)
         self.menu_font = pygame.font.Font(None, 100)
-        self.HIT_BUTTON = [100, 800, 200, 100]
-        self.STAND_BUTTON = [500, 800, 200, 100]
+        self.HIT_BUTTON = [100, 600, 200, 100]
+        self.STAND_BUTTON = [500, 600, 200, 100]
         self.RESET_BUTTON = [500, 0, 200, 100]
         self.deck = Deck()
         self.player_hand = [self.deck.deal_card(), self.deck.deal_card()]
@@ -133,8 +133,18 @@ class Game:
             # Draw deal button
             if not self.deal_button_clicked:
                 draw_button(self.screen, self.font, "Deal", *self.DEAL_BUTTON)
+                draw_button(self.screen, self.font,
+                            "Bet $1", *self.BET_1_BUTTON)
+                draw_button(self.screen, self.font,
+                            "Bet $10", *self.BET_10_BUTTON)
+                draw_button(self.screen, self.font,
+                            "Bet $25", *self.BET_25_BUTTON)
+                draw_button(self.screen, self.font,
+                            "Bet $50", *self.BET_50_BUTTON)
             else:
-
+                draw_button(self.screen, self.font, "Hit", *self.HIT_BUTTON)
+                draw_button(self.screen, self.font,
+                            "Stand", *self.STAND_BUTTON)
                 # Draw player's hand
                 for i, card in enumerate(self.player_hand):
                     draw_card(self.screen, self.card_font,
@@ -154,13 +164,6 @@ class Game:
                     draw_hidden_card(self.screen, self.card_font, 210, 350)
                     draw_text(self.screen, self.font, f"Dealer's hand:   {
                         self.calculate_total(self.dealer_hand[:1])} + ?", 100, 300)
-
-            draw_button(self.screen, self.font, "Hit", *self.HIT_BUTTON)
-            draw_button(self.screen, self.font, "Stand", *self.STAND_BUTTON)
-            draw_button(self.screen, self.font, "Bet $1", *self.BET_1_BUTTON)
-            draw_button(self.screen, self.font, "Bet $10", *self.BET_10_BUTTON)
-            draw_button(self.screen, self.font, "Bet $25", *self.BET_25_BUTTON)
-            draw_button(self.screen, self.font, "Bet $50", *self.BET_50_BUTTON)
 
             draw_text(self.screen, self.font, f"Current bet: ${
                       self.current_bet}", 100, 550)
@@ -213,9 +216,9 @@ class Game:
                     self.player_balance += self.current_bet
                     self.bet_paid = True
 
-                # Draw button to deal new hand
+                # Draw button to play again
                 draw_button(self.screen, self.font,
-                            "Deal Again", *self.RESET_BUTTON)
+                            "Play Again", *self.RESET_BUTTON)
 
         pygame.display.flip()
 
