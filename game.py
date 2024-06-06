@@ -1,14 +1,16 @@
 import pygame
 from ui import draw_text, draw_button, draw_card, draw_hidden_card, draw_menu_card
 from deck import Deck
+from options_menu import OptionsMenu
 
 
 class Game:
     def __init__(self, screen):
         self.screen = screen
         self.MAIN_MENU_BUTTON = [300, 300, 200, 100]
-        self.PLAY_BUTTON = [400, 550, 200, 100]
-        self.QUIT_BUTTON = [725, 550, 200, 100]
+        self.PLAY_BUTTON = [275, 550, 200, 100]
+        self.QUIT_BUTTON = [825, 550, 200, 100]
+        self.OPTIONS_BUTTON = [550, 550, 200, 100]
         self.show_main_menu = True
         self.font = pygame.font.Font(None, 50)
         self.card_font = pygame.font.Font(None, 27)
@@ -33,9 +35,11 @@ class Game:
         self.CONFIRM_BUTTON = [300, 300, 200, 100]
         self.CANCEL_BUTTON = [750, 300, 200, 100]
         self.show_reset_prompt = False
-        self.show_main_menu = True
         self.DEAL_BUTTON = [400, 400, 200, 100]
         self.deal_button_clicked = False
+        self.show_options_menu = False
+        self.background_color = (0, 255, 0)  # Green
+        self.options_menu = OptionsMenu(screen, self.font)
 
     def is_button_clicked(self, button, mouse_pos):
         return (button[0] <= mouse_pos[0] <= (button[0] + button[2]) and
@@ -53,6 +57,19 @@ class Game:
                         self.reset_game()
                     elif self.is_button_clicked(self.QUIT_BUTTON, event.pos):
                         return False
+                    elif self.is_button_clicked(self.OPTIONS_BUTTON, event.pos):
+                        self.show_main_menu = False
+                        self.show_options_menu = True
+                # Options menu
+                elif self.show_options_menu:
+                    new_color = self.options_menu.handle_events(event)
+                    if new_color is not None:
+                        self.background_color = new_color
+                        self.show_options_menu = False
+                        self.show_main_menu = True
+                # Exit to main menu
+                elif self.show_reset_prompt:
+                    self.handle_exit_to_main_menu(event)
                 # Get bets
                 elif not self.deal_button_clicked:
                     if self.is_button_clicked(self.BET_1_BUTTON, event.pos):
@@ -107,7 +124,7 @@ class Game:
 
     def draw(self):
         if self.show_main_menu:
-            self.screen.fill((0, 255, 0))
+            self.screen.fill(self.background_color)
 
             # Draw background
             pygame.draw.rect(self.screen, (0, 0, 0), (180, 180, 960, 520))
@@ -125,8 +142,14 @@ class Game:
             draw_text(self.screen, self.menu_font, "Blackjack", 500, 210)
             draw_button(self.screen, self.font, "Play", *self.PLAY_BUTTON)
             draw_button(self.screen, self.font, "Quit", *self.QUIT_BUTTON)
+            draw_button(self.screen, self.font,
+                        "Options", *self.OPTIONS_BUTTON)
+        elif self.show_options_menu:
+            self.screen.fill(self.background_color)
+            self.options_menu.draw()
+
         else:
-            self.screen.fill((0, 255, 0))
+            self.screen.fill(self.background_color)
             draw_text(self.screen, self.font, f"Player's hand:  {
                       self.calculate_total(self.player_hand)}", 100, 100)
 
@@ -208,15 +231,15 @@ class Game:
                     draw_text(self.screen, self.font, "It's a tie!", 0, 0)
                     self.win_status = "T"
 
-                # Pay out winnings
-                if self.win_status == "W" and not self.bet_paid:
-                    self.player_balance += self.current_bet * 2
-                    self.bet_paid = True
-                elif self.win_status == "T" and not self.bet_paid:
-                    self.player_balance += self.current_bet
-                    self.bet_paid = True
+                    # Pay out winnings
+                    if self.win_status == "W" and not self.bet_paid:
+                        self.player_balance += self.current_bet * 2
+                        self.bet_paid = True
+                    elif self.win_status == "T" and not self.bet_paid:
+                        self.player_balance += self.current_bet
+                        self.bet_paid = True
 
-                # Draw button to play again
+                    # Draw button to play again
                 draw_button(self.screen, self.font,
                             "Play Again", *self.RESET_BUTTON)
 
