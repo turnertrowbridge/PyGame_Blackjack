@@ -231,13 +231,13 @@ class Game:
                     draw_text(self.screen, self.font, "It's a tie!", 0, 0)
                     self.win_status = "T"
 
-                    # Pay out winnings
-                    if self.win_status == "W" and not self.bet_paid:
-                        self.player_balance += self.current_bet * 2
-                        self.bet_paid = True
-                    elif self.win_status == "T" and not self.bet_paid:
-                        self.player_balance += self.current_bet
-                        self.bet_paid = True
+                # Pay out winnings
+                if self.win_status == "W" and not self.bet_paid:
+                    self.player_balance += self.current_bet * 2
+                    self.bet_paid = True
+                elif self.win_status == "T" and not self.bet_paid:
+                    self.player_balance += self.current_bet
+                    self.bet_paid = True
 
                     # Draw button to play again
                 draw_button(self.screen, self.font,
